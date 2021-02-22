@@ -105,7 +105,7 @@
       $.ajax({
         type: "GET",
         //YOUR TURN: Replace with csv export link
-		    url: 'https://docs.google.com/spreadsheets/d/1MiqwGe_7m6B0xFQfaS3GGRO8CmGm5xlXPICDPEeGHyo/gviz/tq?tqx=out:csv&sheet=Sheet1',
+		url: 'https://docs.google.com/spreadsheets/d/1MiqwGe_7m6B0xFQfaS3GGRO8CmGm5xlXPICDPEeGHyo/gviz/tq?tqx=out:csv&sheet=Sheet1',
         //url: 'https://docs.google.com/spreadsheets/d/1ZcMZLBm62WHN8W_HQCuRqXo1x9Pq3otUGSmAp7Zj0Uk/gviz/tq?tqx=out:csv&sheet=Sheet1',
         dataType: "text",
         success: function (csvData) { makeGeoJSON(csvData); }
@@ -130,7 +130,7 @@
                 'data': data
               },
               'paint': {
-                'circle-radius': 20,
+                'circle-radius': 5,
                 'circle-color': "black"
               }
             });
