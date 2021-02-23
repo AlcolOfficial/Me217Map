@@ -91,11 +91,11 @@
       };
     };
     //YOUR TURN: add your Mapbox token
-    
-    mapboxgl.accessToken = 'pk.eyJ1IjoiYWxjb2wiLCJhIjoiY2tsZnUxaTRwMG10dzJ2b2lzNXpvNHB1dyJ9.aycgZVz710QiYGRhXr0PlA'; //Mapbox token 
+
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYWxjb2wiLCJhIjoiY2tsZnUxaTRwMG10dzJ2b2lzNXpvNHB1dyJ9.aycgZVz710QiYGRhXr0PlA'; //Mapbox token
     var map = new mapboxgl.Map({
       container: 'map', // container id
-      style: 'mapbox://styles/mapbox/streets-v11', // YOUR TURN: choose a style: https://docs.mapbox.com/api/maps/#styles
+      style: 'mapbox://styles/mapbox/satellite-v9', // YOUR TURN: choose a style: https://docs.mapbox.com/api/maps/#styles
       center: [-122.411, 37.785], // starting position [lng, lat]
       zoom: 10,// starting zoom
       transformRequest: transformRequest
@@ -144,22 +144,22 @@
 		  //You can adjust the values of the popup to match the headers of your CSV.
 		  // For example: e.features[0].properties.Name is retrieving information from the field Name in the original CSV.
 		console.log(e.features[0].properties);
-		  var description =
-		    `<h3>` +
-		    e.features[0].properties.Nom +
-		    `</h3>` +
-		    `<h4>` +
-		    `<b>` +
-		    `Address: ` +
-		    `</b>` +
-		    e.features[0].properties.Adress +
-		    `</h4>` +
-		    `<h4>` +
-		    `<b>` +
-		    `Phone: ` +
-		    `</b>` +
-		    e.features[0].properties.Phone +
-		    `</h4>`;
+		var description =
+		  `<h3>` +
+		  e.features[0].properties.Nom +
+		  `</h3>` +
+		  `<h4>` +
+		  `<b>` +
+		  `Address: ` +
+		  `</b>` +
+		  e.features[0].properties.Adress +
+		  `</h4>` +
+		  `<h4>` +
+		  `<b>` +
+		  `Phone: ` +
+		  `</b>` +
+		  e.features[0].properties.Phone +
+		  `</h4>`;
 
 		  // Ensure that if the map is zoomed out such that multiple
 		  // copies of the feature are visible, the popup appears
@@ -181,7 +181,7 @@
 		  map.getCanvas().style.cursor = 'pointer';
 		});
 		// Change it back to a pointer when it leaves.
-		map.on('mouseleave', 'places', function() {
+		map.on('mouseleave', 'csvData', function() {
 		  map.getCanvas().style.cursor = '';
 		  popup.remove();
 		});
