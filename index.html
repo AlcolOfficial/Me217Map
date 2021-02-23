@@ -180,10 +180,10 @@
 		map.on('mouseenter', 'csvData', function() {
 		  map.getCanvas().style.cursor = 'pointer';
 		});
-
 		// Change it back to a pointer when it leaves.
 		map.on('mouseleave', 'places', function() {
 		  map.getCanvas().style.cursor = '';
+		  popup.remove();
 		});
 
 		var bbox = turf.bbox(data);
