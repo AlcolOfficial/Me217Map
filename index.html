@@ -97,7 +97,7 @@
       container: 'map', // container id
       style: 'mapbox://styles/mapbox/satellite-streets-v10', // YOUR TURN: choose a style: https://docs.mapbox.com/api/maps/#styles
       center: [6.224643, 49.094974], // starting position [lng, lat]
-      zoom: 10,// starting zoom
+      zoom: 17,// starting zoom
       transformRequest: transformRequest
     });
 
@@ -127,12 +127,24 @@
               'type': 'circle',
               'source': {
                 'type': 'geojson',
-                'data': data
+                //'data': data
+				"data": {
+					"type": "Feature",
+					"geometry": {
+						"type": "Point",
+						"coordinates": [latfield, longfield]
+					},
+					"properties": {
+						"title": "Mapbox DC",
+						"marker-symbol": "monument"
+					}
+				}
               },
               'paint': {
                 'circle-radius': 5,
                 'circle-color': "red"
               }
+			  
             });
           
           var popup = new mapboxgl.Popup({
