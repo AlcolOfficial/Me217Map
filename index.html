@@ -116,7 +116,7 @@
       $.ajax({
         type: "GET",
 	url: 'https://docs.google.com/spreadsheets/d/1ZcMZLBm62WHN8W_HQCuRqXo1x9Pq3otUGSmAp7Zj0Uk/gviz/tq?tqx=out:csv&sheet=Locations',
-	//url: 'https://docs.google.com/spreadsheets/d/1MiqwGe_7m6B0xFQfaS3GGRO8CmGm5xlXPICDPEeGHyo/gviz/tq?tqx=out:csv&sheet=Sheet1',
+	    //url: 'https://docs.google.com/spreadsheets/d/1MiqwGe_7m6B0xFQfaS3GGRO8CmGm5xlXPICDPEeGHyo/gviz/tq?tqx=out:csv&sheet=Sheet1',
         //url: 'https://raw.githubusercontent.com/AlcolOfficial/Me217Map/main/data.csv',
         dataType: "text",
         success: function (csvData) { makeGeoJSON(csvData); }
@@ -137,19 +137,29 @@
 			  console.log("dataPoint:");
 			  console.log(dataPoint);
 			  
+			  var coordinates = dataPoint.geometry.coordinates;
+			  var nom = dataPoint.properties.Nom;
+			  var prenom = dataPoint.properties.Prenom;
+			  var bucque = dataPoint.properties.Bucque;
+			  var nums = dataPoint.properties.Nums;
+			  var adresse = dataPoint.properties.Adresse;
+			  var telephone = dataPoint.properties.Telephone;
+			  
+			  
+			  
 			  // create a HTML element for each feature
 			  var DOMel = document.createElement('div');
 			  DOMel.className = 'marker';
 			  DOMel.style.backgroundImage = 'url(https://i.pinimg.com/originals/b6/64/98/b6649840c18d97597383482149014dfd.png)';				
-				
+			  
 			  var hoverPopup = new mapboxgl.Popup({offset: [0,-10], closeOnClik: true, anchor:'bottom'})
-				  .setHTML("<h1>Hello World!</h1>")
-				  .setLngLat(dataPoint.geometry.coordinates);
+				  .setHTML(dataPoint.properties.Nom)
+				  .setLngLat(coordinates);
 			  var clickPopup = new mapboxgl.Popup({offset: [0,-10], closeOnClik: true, anchor:'bottom'})
 				  .setHTML("<h1>Hello World!</h1>" + dataPoint.properties.Nom);
 
 			  var mark = new mapboxgl.Marker(DOMel)
-				  .setLngLat(dataPoint.geometry.coordinates)
+				  .setLngLat(coordinates)
 				  .setPopup(clickPopup)
 				  .addTo(map);
 			  
