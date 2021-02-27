@@ -72,6 +72,14 @@
     .mapboxgl-popup-anchor-top>.mapboxgl-popup-tip {
       border-bottom-color: rgb(61, 59, 59);
     }
+	
+	.marker {
+	  background-size: cover;
+	  width: 50px;
+	  height: 50px;
+	  border-radius: 50%;
+	  cursor: pointer;
+	}
   </style>
 </head>
 
@@ -90,123 +98,90 @@
           : url
       };
     };
-    //YOUR TURN: add your Mapbox token
 
     mapboxgl.accessToken = 'pk.eyJ1IjoiYWxjb2wiLCJhIjoiY2tsZnUxaTRwMG10dzJ2b2lzNXpvNHB1dyJ9.aycgZVz710QiYGRhXr0PlA'; //Mapbox token
+	
     var map = new mapboxgl.Map({
       container: 'map', // container id
-      style: 'mapbox://styles/mapbox/satellite-streets-v10', // YOUR TURN: choose a style: https://docs.mapbox.com/api/maps/#styles
+      style: 'mapbox://styles/mapbox/satellite-streets-v10', // choose a style: https://docs.mapbox.com/api/maps/#styles
       center: [6.224643, 49.094974], // starting position [lng, lat]
       zoom: 17,// starting zoom
-      transformRequest: transformRequest
+      transformRequest: transformRequest,
+	  hash: true,
+	  logoPosition: 'bottom-right',
+	  doubleClickZoom: false
     });
 
     $(document).ready(function () {
       $.ajax({
         type: "GET",
-        //YOUR TURN: Replace with csv export link
-	//url: 'https://docs.google.com/spreadsheets/d/1MiqwGe_7m6B0xFQfaS3GGRO8CmGm5xlXPICDPEeGHyo/gviz/tq?tqx=out:csv&sheet=Sheet1',
-        url: 'https://docs.google.com/spreadsheets/d/1ZcMZLBm62WHN8W_HQCuRqXo1x9Pq3otUGSmAp7Zj0Uk/gviz/tq?tqx=out:csv&sheet=Locations',
+	url: 'https://docs.google.com/spreadsheets/d/1MiqwGe_7m6B0xFQfaS3GGRO8CmGm5xlXPICDPEeGHyo/gviz/tq?tqx=out:csv&sheet=Sheet1',
+        //url: 'https://raw.githubusercontent.com/AlcolOfficial/Me217Map/main/data.csv',
         dataType: "text",
         success: function (csvData) { makeGeoJSON(csvData); }
       });
 
 
-
-      function makeGeoJSON(csvData) {
+	function makeGeoJSON(csvData) {
         csv2geojson.csv2geojson(csvData, {
           latfield: 'Latitude',
           lonfield: 'Longitude',
           delimiter: ','
         }, function (err, data) {
+		  console.log("data.features:");
+		  console.log(data.features);
           map.on('load', function () {
 
-            //Add the the layer to the map
-            map.addLayer({
-              'id': 'csvData',
-              'type': 'circle',
-              'source': {
-                'type': 'geojson',
-                //'data': data
-				"data": {
-					"type": "Feature",
-					"geometry": {
-						"type": "Point",
-						"coordinates": [latfield, longfield]
-					},
-					"properties": {
-						"title": "Mapbox DC",
-						"marker-symbol": "monument"
-					}
-				}
-              },
-              'paint': {
-                'circle-radius': 5,
-                'circle-color': "red"
-              }
+			data.features.forEach(function(dataPoint) {
+			  console.log("dataPoint:");
+			  console.log(dataPoint);
 			  
-            });
-          
-          var popup = new mapboxgl.Popup({
-            closeButton: false,
-            closeOnClick: false
-          });
-          
-          // When a click event occurs on a feature in the csvData layer, open a popup at the
-          // location of the feature, with description HTML from its properties.
-          map.on('mouseenter', 'csvData', function(e) {
-            var coordinates = e.features[0].geometry.coordinates.slice();
+			  // create a HTML element for each feature
+			  var DOMel = document.createElement('div');
+			  DOMel.className = 'marker';
+			  DOMel.style.backgroundImage = 'url(https://i.pinimg.com/originals/b6/64/98/b6649840c18d97597383482149014dfd.png)';				
+				
+			  var hoverPopup = new mapboxgl.Popup({offset: [0,-10], closeOnClik: true, anchor:'bottom'})
+				  .setHTML("<h1>Hello World!</h1>")
+				  .setLngLat(dataPoint.geometry.coordinates);
+			  var clickPopup = new mapboxgl.Popup({offset: [0,-10], closeOnClik: true, anchor:'bottom'})
+				  .setHTML("<h1>Hello World!</h1>" + dataPoint.properties.Nom);
 
-            //set popup text
-            //You can adjust the values of the popup to match the headers of your CSV.
-            // For example: e.features[0].properties.Name is retrieving information from the field Name in the original CSV.
-            console.log(e.features[0].properties);
-            var description =
-              `<h3>` +
-              e.features[0].properties.Nom +
-              `</h3>` +
-              `<h4>` +
-              `<b>` +
-              `Address: ` +
-              `</b>` +
-              e.features[0].properties.Adress +
-              `</h4>` +
-              `<h4>` +
-              `<b>` +
-              `Phone: ` +
-              `</b>` +
-              e.features[0].properties.Phone +
-              `</h4>`;
-
-              // Ensure that if the map is zoomed out such that multiple
-              // copies of the feature are visible, the popup appears
-              // over the copy being pointed to.
-              while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-            }
-
-            //add Popup to map
-            popup.setLngLat(coordinates).setHTML(description).addTo(map);
-            
-          });
-
-          // Change the cursor to a pointer when the mouse is over the places layer.
-          map.on('mouseenter', 'csvData', function() {
-            map.getCanvas().style.cursor = 'pointer';
-          });
-          // Change it back to a pointer when it leaves.
-          map.on('mouseleave', 'csvData', function() {
-            map.getCanvas().style.cursor = '';
-            popup.remove();
-          });
-
-          var bbox = turf.bbox(data);
-          map.fitBounds(bbox, { padding: 50 });
-
-          });
-
+			  var mark = new mapboxgl.Marker(DOMel)
+				  .setLngLat(dataPoint.geometry.coordinates)
+				  .setPopup(clickPopup)
+				  .addTo(map);
+			  
+			  mark.getElement().addEventListener('mouseenter', function() {
+				  console.log("mouse enter marker");
+				  hoverPopup.addTo(map);
+				  clickPopup.remove();
+			  });
+			  mark.getElement().addEventListener('mouseleave', function() {
+				  console.log("mouse leave marker");
+				  hoverPopup.remove();
+			  });
+			  
+			}); //data.features.forEach() end
+		  
+			var nav = new mapboxgl.NavigationControl();
+			map.addControl(nav, 'top-left');
+			var scale = new mapboxgl.ScaleControl({maxWidth: 80, unit: 'imperial'});
+			map.addControl(scale); 
+			scale.setUnit('metric');
+			var fullScreen = new mapboxgl.FullscreenControl({container: document.querySelector('body')})
+			map.addControl(fullScreen);
+		  
+            var bbox = turf.bbox(data);
+            map.fitBounds(bbox, { padding: 50 });
+		  
+          }); //map.on('load') end
         });
       };
+	  
+	  
+	  	
+
     });
 
 
