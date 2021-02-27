@@ -133,8 +133,8 @@
           map.on('load', function () {
 
 			data.features.forEach(function(dataPoint) {
-			  console.log("dataPoint:");
-			  console.log(dataPoint);
+			  //console.log("dataPoint:");
+			  //console.log(dataPoint);
 			  
 			  var coordinates = dataPoint.geometry.coordinates;
 			  var nom = dataPoint.properties.Nom;
@@ -150,15 +150,14 @@
 			  // create a HTML element for each feature
 			  var DOMel = document.createElement('div');
 			  DOMel.className = 'marker';
-			  console.log('url(' + imageLink + ')');
 			  DOMel.style.backgroundImage = 'url(' + imageLink + ')';
 			  //DOMel.style.backgroundImage = 'url(https://drive.google.com/uc?export=download&id=1pLXAXgo68nx9FLCHuJ8J97GwniS5JB8h)';				
 			  
 			  var hoverPopup = new mapboxgl.Popup({offset: [0,-10], closeOnClik: true, anchor:'bottom'})
-				  .setHTML(dataPoint.properties.Nom)
+				  .setHTML(bucque + nums)
 				  .setLngLat(coordinates);
 			  var clickPopup = new mapboxgl.Popup({offset: [0,-10], closeOnClik: true, anchor:'bottom'})
-				  .setHTML("<h1>Hello World!</h1>" + dataPoint.properties.Nom);
+				  .setHTML("<h1>" + nom + prenom + "</h1>" + adresse + telephone);
 
 			  var mark = new mapboxgl.Marker(DOMel)
 				  .setLngLat(coordinates)
@@ -166,12 +165,12 @@
 				  .addTo(map);
 			  
 			  mark.getElement().addEventListener('mouseenter', function() {
-				  console.log("mouse enter marker");
+				  //console.log("mouse enter marker");
 				  hoverPopup.addTo(map);
 				  clickPopup.remove();
 			  });
 			  mark.getElement().addEventListener('mouseleave', function() {
-				  console.log("mouse leave marker");
+				  //console.log("mouse leave marker");
 				  hoverPopup.remove();
 			  });
 			  
