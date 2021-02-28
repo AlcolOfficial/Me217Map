@@ -26,7 +26,7 @@
     /* Popup styling */
 
     .mapboxgl-popup {
-      padding-bottom: 5px;
+      padding-bottom: 5;
     }
 
     .mapboxgl-popup-close-button {
@@ -34,9 +34,10 @@
     }
 
     .mapboxgl-popup-content {
+	  margin: auto;
       font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
-      padding: 0;
-      width: 250px;
+      padding: 10px;
+      width: auto;
     }
 
     .mapboxgl-popup-content-wrapper {
@@ -44,9 +45,7 @@
     }
 
     .mapboxgl-popup-content h3 {
-      background: rgb(61, 59, 59);
       text-align: center;
-      color: #fff;
       margin: 0;
       display: block;
       padding: 15px;
@@ -75,9 +74,12 @@
 	
 	.marker {
 	  background-size: cover;
+	  background-position: center;
 	  width: 50px;
-	  height: 50px;
-	  border-radius: 50%;
+	  height: 60px;
+	  border: 2px solid #333;
+	  padding: 0px;
+	  border-radius: 10%;
 	  cursor: pointer;
 	}
   </style>
@@ -107,15 +109,14 @@
       center: [6.224643, 49.094974], // starting position [lng, lat]
       zoom: 17,// starting zoom
       transformRequest: transformRequest,
-	  hash: true,
-	  logoPosition: 'bottom-right',
-	  doubleClickZoom: false
+	  hash: false,
+	  logoPosition: 'bottom-right'
     });
 
     $(document).ready(function () {
       $.ajax({
         type: "GET",
-	url: 'https://docs.google.com/spreadsheets/d/1ZcMZLBm62WHN8W_HQCuRqXo1x9Pq3otUGSmAp7Zj0Uk/gviz/tq?tqx=out:csv&sheet=Locations',
+		url: 'https://docs.google.com/spreadsheets/d/1ZcMZLBm62WHN8W_HQCuRqXo1x9Pq3otUGSmAp7Zj0Uk/gviz/tq?tqx=out:csv&sheet=Locations',
         //url: 'https://raw.githubusercontent.com/AlcolOfficial/Me217Map/main/data.csv',
         dataType: "text",
         success: function (csvData) { makeGeoJSON(csvData); }
@@ -144,20 +145,17 @@
 			  var adresse = dataPoint.properties.Adresse;
 			  var telephone = dataPoint.properties.Telephone;
 			  var imageLink = dataPoint.properties.ImageLink;
-			  
-			  
-			  
+
 			  // create a HTML element for each feature
 			  var DOMel = document.createElement('div');
 			  DOMel.className = 'marker';
-			  DOMel.style.backgroundImage = 'url(' + imageLink + ')';
-			  //DOMel.style.backgroundImage = 'url(https://drive.google.com/uc?export=download&id=1pLXAXgo68nx9FLCHuJ8J97GwniS5JB8h)';				
+			  DOMel.style.backgroundImage = 'url(' + imageLink + ')';				
 			  
 			  var hoverPopup = new mapboxgl.Popup({offset: [0,-10], closeOnClik: true, anchor:'bottom'})
 				  .setHTML(bucque + nums)
 				  .setLngLat(coordinates);
 			  var clickPopup = new mapboxgl.Popup({offset: [0,-10], closeOnClik: true, anchor:'bottom'})
-				  .setHTML("<h1>" + nom + prenom + "</h1>" + adresse + telephone);
+				  .setHTML("<h3>" + prenom + nom + "</h3>" + adresse + telephone);
 
 			  var mark = new mapboxgl.Marker(DOMel)
 				  .setLngLat(coordinates)
@@ -165,12 +163,11 @@
 				  .addTo(map);
 			  
 			  mark.getElement().addEventListener('mouseenter', function() {
-				  //console.log("mouse enter marker");
-				  hoverPopup.addTo(map);
-				  clickPopup.remove();
+				  if(!clickPopup.isOpen()) {
+					  hoverPopup.addTo(map);
+				  };;
 			  });
 			  mark.getElement().addEventListener('mouseleave', function() {
-				  //console.log("mouse leave marker");
 				  hoverPopup.remove();
 			  });
 			  
