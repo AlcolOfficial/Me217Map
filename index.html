@@ -167,7 +167,7 @@
 						var mark = new mapboxgl.Marker(DOMel)
 							.setLngLat(coordinates)
 							.setPopup(clickPopup)
-							;//.addTo(map);
+							.addTo(map);
 						
 						mark.getElement().addEventListener('mouseenter', function() {
 							if(!clickPopup.isOpen()) {
