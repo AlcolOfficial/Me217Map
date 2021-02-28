@@ -75,11 +75,11 @@
 	.marker {
 	  background-size: cover;
 	  background-position: center;
-	  width: 50px;
+	  width: 60px;
 	  height: 60px;
 	  border: 2px solid #333;
 	  padding: 0px;
-	  border-radius: 10%;
+	  border-radius: 50%;
 	  cursor: pointer;
 	}
   </style>
@@ -116,80 +116,98 @@
     $(document).ready(function () {
       $.ajax({
         type: "GET",
-		url: 'https://docs.google.com/spreadsheets/d/1ZcMZLBm62WHN8W_HQCuRqXo1x9Pq3otUGSmAp7Zj0Uk/gviz/tq?tqx=out:csv&sheet=Locations',
+	url: 'https://docs.google.com/spreadsheets/d/1ZcMZLBm62WHN8W_HQCuRqXo1x9Pq3otUGSmAp7Zj0Uk/gviz/tq?tqx=out:csv&sheet=Locations',
         //url: 'https://raw.githubusercontent.com/AlcolOfficial/Me217Map/main/data.csv',
         dataType: "text",
         success: function (csvData) { makeGeoJSON(csvData); }
       });
 
 
-	function makeGeoJSON(csvData) {
-        csv2geojson.csv2geojson(csvData, {
-          latfield: 'Latitude',
-          lonfield: 'Longitude',
-          delimiter: ','
-        }, function (err, data) {
-		  console.log("data.features:");
-		  console.log(data.features);
-          map.on('load', function () {
+			function makeGeoJSON(csvData) {
+				csv2geojson.csv2geojson(csvData, {
+					latfield: 'Latitude',
+					lonfield: 'Longitude',
+					delimiter: ','
+				}, function (err, data) {
+					console.log("data.features:");
+					console.log(data.features);
+					
+					data.features.forEach(function(dataPoint) {
+						//console.log("dataPoint:");
+						//console.log(dataPoint);
+						
+						var coordinates = dataPoint.geometry.coordinates;
+						var nom = dataPoint.properties.Nom;
+						var prenom = dataPoint.properties.Prenom;
+						var bucque = dataPoint.properties.Bucque;
+						var nums = dataPoint.properties.Nums;
+						var adresse = dataPoint.properties.Adresse;
+						var telephone = dataPoint.properties.Telephone;
+						var imageLink = dataPoint.properties.ImageLink;
+						
 
-			data.features.forEach(function(dataPoint) {
-			  //console.log("dataPoint:");
-			  //console.log(dataPoint);
-			  
-			  var coordinates = dataPoint.geometry.coordinates;
-			  var nom = dataPoint.properties.Nom;
-			  var prenom = dataPoint.properties.Prenom;
-			  var bucque = dataPoint.properties.Bucque;
-			  var nums = dataPoint.properties.Nums;
-			  var adresse = dataPoint.properties.Adresse;
-			  var telephone = dataPoint.properties.Telephone;
-			  var imageLink = dataPoint.properties.ImageLink;
+						map.loadImage('imageLink', function(error, image) {
+							if (error) throw error;
+							map.addImage(nom+prenom, image);
+							dataPoint.properties.icon = nom+prenom;
+							console.log("Image " + nom+prenom + " loaded");
+						});
+						
+						// create a HTML element for each feature
+						var DOMel = document.createElement('div');
+						DOMel.className = 'marker';
+						DOMel.style.backgroundImage = 'url(' + imageLink + ')';				
+						
+						var hoverPopup = new mapboxgl.Popup({offset: [0,-10], closeOnClik: true, anchor:'bottom'})
+							.setHTML(bucque + " " + nums)
+							.setLngLat(coordinates);
+						var clickPopup = new mapboxgl.Popup({offset: [0,-10], closeOnClik: true, anchor:'bottom'})
+							.setHTML("<h3>" + prenom + " " + nom + "</h3>" + adresse + "\n" + telephone);
 
-			  // create a HTML element for each feature
-			  var DOMel = document.createElement('div');
-			  DOMel.className = 'marker';
-			  DOMel.style.backgroundImage = 'url(' + imageLink + ')';				
-			  
-			  var hoverPopup = new mapboxgl.Popup({offset: [0,-10], closeOnClik: true, anchor:'bottom'})
-				  .setHTML(bucque + nums)
-				  .setLngLat(coordinates);
-			  var clickPopup = new mapboxgl.Popup({offset: [0,-10], closeOnClik: true, anchor:'bottom'})
-				  .setHTML("<h3>" + prenom + nom + "</h3>" + adresse + telephone);
-
-			  var mark = new mapboxgl.Marker(DOMel)
-				  .setLngLat(coordinates)
-				  .setPopup(clickPopup)
-				  .addTo(map);
-			  
-			  mark.getElement().addEventListener('mouseenter', function() {
-				  if(!clickPopup.isOpen()) {
-					  hoverPopup.addTo(map);
-				  };;
-			  });
-			  mark.getElement().addEventListener('mouseleave', function() {
-				  hoverPopup.remove();
-			  });
-			  
-			}); //data.features.forEach() end
-		  
-			var nav = new mapboxgl.NavigationControl();
-			map.addControl(nav, 'top-left');
-			var scale = new mapboxgl.ScaleControl({maxWidth: 80, unit: 'imperial'});
-			map.addControl(scale); 
-			scale.setUnit('metric');
-			var fullScreen = new mapboxgl.FullscreenControl({container: document.querySelector('body')})
-			map.addControl(fullScreen);
-		  
-            var bbox = turf.bbox(data);
-            map.fitBounds(bbox, { padding: 50 });
-		  
-          }); //map.on('load') end
-        });
-      };
-	  
-	  
-	  	
+						var mark = new mapboxgl.Marker(DOMel)
+							.setLngLat(coordinates)
+							.setPopup(clickPopup)
+							;//.addTo(map);
+						
+						mark.getElement().addEventListener('mouseenter', function() {
+							if(!clickPopup.isOpen()) {
+								hoverPopup.addTo(map);
+							};;
+						});
+						mark.getElement().addEventListener('mouseleave', function() {
+							hoverPopup.remove();
+						});
+					
+					}); //data.features.forEach() end
+					
+					var nav = new mapboxgl.NavigationControl();
+					map.addControl(nav, 'top-left');
+					var scale = new mapboxgl.ScaleControl({maxWidth: 80, unit: 'imperial'});
+					map.addControl(scale); 
+					scale.setUnit('metric');
+					var fullScreen = new mapboxgl.FullscreenControl({container: document.querySelector('body')})
+					map.addControl(fullScreen);
+					
+					var bbox = turf.bbox(data);
+					map.fitBounds(bbox, { padding: 50 });
+					map.on('load', function () {
+							map.addLayer({
+								id: 'data',
+								type: 'symbol',
+								'source': {
+												'type': 'geojson',
+									'data': data
+											},
+								layout: {
+								'icon-size': 0.05,
+								'icon-image': ['image', ['get', 'icon'] ]
+								}
+							});
+							
+						console.log(data);
+					}); //map.on('load') end
+				});
+			};
 
     });
 
