@@ -143,17 +143,15 @@
 
 				map.on('load', function () {
 					
-					
 					updateMarkers();
-					
 					map.addSource('dataSource', {
 						'type': 'geojson',
 						'data': data,
 						'cluster': true,
-						'clusterRadius': 50,
-						// 'clusterMaxZoom': 5,
+						'clusterRadius': 27,
+						'clusterMaxZoom': 10,
 						'clusterProperties': {
-							'listeBucques': ['concat', ['get', 'Bucque'], ' ']
+							'unitNumber': ['concat',['get','Nom']]
 						}
 					});
 					
@@ -176,7 +174,7 @@
 						'filter': ['==', 'cluster', true],
 						
 						'layout': {
-							// 'text-field': ['get','listeBucques'],
+							// 'text-field': ['get','unitNumber'],
 							'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
 							'text-size': 10
 						},
@@ -203,9 +201,9 @@
 						'filter': ['!=', 'cluster', true],
 						
 						'layout': {
-							'text-field': ['get','Bucque'],
+							'text-field': ['concat',['get','Nom'], ['get','Prenom']],
 							'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-							'text-size': 30,
+							'text-size': 10,
 							'text-anchor': 'center',
 							'text-offset': [0,1.2]
 						},
@@ -218,14 +216,19 @@
 					
 					
 					function updateMarkers() {
+						console.log("Update Markers");
 						$( ".marker" ).remove(); // remove all existing markers
 						var features = map.querySourceFeatures( 'dataSource' );
 						
 						features.forEach(function(dataPoint) {
+								// console.log(dataPoint.properties.cluster);
 								if (dataPoint.properties.cluster){ // if the feature is clustered
+									
 									var DOMel = document.createElement('div');
-									DOMel.className = 'marker';
-									DOMel.style.backgroundImage = 'url(https://drive.google.com/uc?export=view&id=1HDjTsM4RRZ6qr_I6jwsSdsBfvxo4n1ve)';
+									// console.log("created marked clustered");
+									// DOMel.innerHTML("Aaaaaaa3");
+									// DOMel.className = 'marker';
+									// DOMel.style.backgroundImage = 'url(https://drive.google.com/uc?export=view&id=1HDjTsM4RRZ6qr_I6jwsSdsBfvxo4n1ve)';
 									
 									var marker = new mapboxgl.Marker(DOMel)
 									.setLngLat(dataPoint.geometry.coordinates)
@@ -274,7 +277,7 @@
 						marker.addTo(map);
 					};
 					
-				}); //map.on('load') end
+				}); //map.on('load') ends
 				
 				///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				
