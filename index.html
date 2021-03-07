@@ -104,9 +104,9 @@
       center: [6.224643, 49.094974], // starting position [lng, lat]
       zoom: 17,// starting zoom
       transformRequest: transformRequest,
-			hash: true,
+			hash: false,
 			logoPosition: 'bottom-right',
-			renderWorldCopies: true,
+			renderWorldCopies: false,
 			localIdeographFontFamily: 'sans-serif',
 			localFontFamily: false,
 			fadeDuration: 300,
@@ -157,7 +157,10 @@
 				url: 'https://docs.google.com/spreadsheets/d/1ZcMZLBm62WHN8W_HQCuRqXo1x9Pq3otUGSmAp7Zj0Uk/gviz/tq?tqx=out:csv&sheet=Locations',
 				//url: 'https://raw.githubusercontent.com/AlcolOfficial/Me217Map/main/data.csv',
 				dataType: "text",
-				success: function (csvData) { processData(csvData); }
+				success: function (csvData) { processData(csvData); },
+				error: function() { 
+					console.log("Cannot load data");
+				}   
 			});
 
 			function processData(csvData) {
