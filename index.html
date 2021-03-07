@@ -154,8 +154,8 @@
 		$(document).ready(function () {
 			$.ajax({
 				type: "GET",
-				url: 'https://docs.google.com/spreadsheets/d/1ZcMZLBm62WHN8W_HQCuRqXo1x9Pq3otUGSmAp7Zj0Uk/gviz/tq?tqx=out:csv&sheet=Locations',
-				//url: 'https://raw.githubusercontent.com/AlcolOfficial/Me217Map/main/data.csv',
+				//url: 'https://docs.google.com/spreadsheets/d/1ZcMZLBm62WHN8W_HQCuRqXo1x9Pq3otUGSmAp7Zj0Uk/gviz/tq?tqx=out:csv&sheet=Locations',
+				url: 'https://raw.githubusercontent.com/AlcolOfficial/Me217Map/main/data.csv',
 				dataType: "text",
 				success: function (csvData) { processData(csvData); },
 				error: function() { 
@@ -186,7 +186,8 @@
 				var bbox = turf.bbox(data);
 				map.fitBounds(bbox, { padding: 50 });
 				
-				map.on('style.load', function () {					
+				map.on('style.load', function () {
+					console.log("style.load");
 					map.addSource('dataSource', {
 						'type': 'geojson',
 						'data': data,
@@ -210,7 +211,7 @@
 							'text-color': '#ffffff'
 						}
 					});
-				
+				});
 				
 
 				// map.on('click', 'dataSource_cluster', openCluster);
@@ -314,7 +315,7 @@
 				
 				
 				///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				});
+				
 			}; //function addDataToMap ends
 			
 		});
