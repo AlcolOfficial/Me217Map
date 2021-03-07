@@ -50,7 +50,7 @@
 			background-position: center;
 			width: 60px;
 			height: 60px;
-			border: 2px solid #333;
+			border: 1.5px solid #a8a8a8;
 			padding: 0px;
 			border-radius: 50%;
 			cursor: pointer;
@@ -59,15 +59,20 @@
 		}
 		
 		.marker.cluster {
-			border: 2px solid #ffffff;
+			width: 40px;
+			height: 40px;
+			border: 1.5px solid #ffffff;
+			z-index: 0;
 		}
 		
 		.marker.spider-leg-pin {
 			margin-left: -31px;
 			margin-top: -31px;
+			z-index: 3;
 		}
 		
 		.spider-leg-container .spider-leg-line {
+			z-index: 3;
 			background-color: #ffffff;
 		}
 		
@@ -149,14 +154,13 @@
 		$(document).ready(function () {
 			$.ajax({
 				type: "GET",
-				//url: 'https://docs.google.com/spreadsheets/d/1ZcMZLBm62WHN8W_HQCuRqXo1x9Pq3otUGSmAp7Zj0Uk/gviz/tq?tqx=out:csv&sheet=Locations',
-				url: 'https://raw.githubusercontent.com/AlcolOfficial/Me217Map/main/data.csv',
+				url: 'https://docs.google.com/spreadsheets/d/1ZcMZLBm62WHN8W_HQCuRqXo1x9Pq3otUGSmAp7Zj0Uk/gviz/tq?tqx=out:csv&sheet=Locations',
+				//url: 'https://raw.githubusercontent.com/AlcolOfficial/Me217Map/main/data.csv',
 				dataType: "text",
 				success: function (csvData) { processData(csvData); }
 			});
 
 			function processData(csvData) {
-				console.log("process data");
 				var data;
 				csv2geojson.csv2geojson(csvData, {
 					latfield: 'Latitude',
@@ -166,24 +170,25 @@
 						data = geoJson;
 					});
 				
-				data.features.forEach(function(feature) {
-					var x = document.createElement('IMG');
-					x.setAttribute('src', feature.properties.ThumbnailLink);
-					document.querySelector('#preload-images').appendChild(x);
-				});
+				
+				// pre-load all images
+				// data.features.forEach(function(feature) {
+					// var x = document.createElement('IMG');
+					// x.setAttribute('src', feature.properties.ThumbnailLink);
+					// document.querySelector('#preload-images').appendChild(x);
+				// });
 				
 				///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				
 				var bbox = turf.bbox(data);
 				map.fitBounds(bbox, { padding: 50 });
 				
-				map.on('style.load', function () {
-					console.log("map load");
+				map.on('style.load', function () {					
 					map.addSource('dataSource', {
 						'type': 'geojson',
 						'data': data,
 						'cluster': true,
-						'clusterRadius': 30,
+						'clusterRadius': 40,
 						'clusterMinPoints': 2
 						// 'clusterMaxZoom': 10
 					});
