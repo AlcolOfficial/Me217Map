@@ -75,8 +75,9 @@
 </head>
 
 <body>
-
+	
   <div id='map'></div>
+	<div id='preload-images' style='display:none'></div>
   <script>
 		
     var transformRequest = (url, resourceType) => {
@@ -164,8 +165,8 @@
 		$(document).ready(function () {
 			$.ajax({
 				type: "GET",
-				url: 'https://docs.google.com/spreadsheets/d/1ZcMZLBm62WHN8W_HQCuRqXo1x9Pq3otUGSmAp7Zj0Uk/gviz/tq?tqx=out:csv&sheet=Locations',
-				//url: 'https://raw.githubusercontent.com/AlcolOfficial/Me217Map/main/data.csv',
+				//url: 'https://docs.google.com/spreadsheets/d/1ZcMZLBm62WHN8W_HQCuRqXo1x9Pq3otUGSmAp7Zj0Uk/gviz/tq?tqx=out:csv&sheet=Locations',
+				url: 'https://raw.githubusercontent.com/AlcolOfficial/Me217Map/main/data.csv',
 				dataType: "text",
 				success: function (csvData) { processData(csvData); }
 			});
@@ -183,8 +184,7 @@
 				data.features.forEach(function(feature) {
 					var x = document.createElement('IMG');
 					x.setAttribute('src', feature.properties.ThumbnailLink);
-					x.style.display = 'none';
-					document.body.appendChild(x);
+					document.querySelector('#preload-images').appendChild(x);
 				});
 				
 				///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
