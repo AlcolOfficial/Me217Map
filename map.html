@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset='utf-8' />
+  <title></title>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+  <script src='https://api.mapbox.com/mapbox-gl-js/v2.0.1/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v2.0.1/mapbox-gl.css' rel='stylesheet' />
+  <script src='https://npmcdn.com/csv2geojson@latest/csv2geojson.js'></script>
+  <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+
+    /* Popup styling */
+
+    .mapboxgl-popup {
+      padding-bottom: 5;
+    }
+
+    .mapboxgl-popup-close-button {
+      display: none;
+    }
+
+    .mapboxgl-popup-content {
+	  margin: auto;
+      font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
+      padding: 10px;
+      width: auto;
+    }
+
+    .mapboxgl-popup-content-wrapper {
+      padding: 1%;
+    }
+
+    .mapboxgl-popup-content h3 {
+      text-align: center;
+      margin: 0;
+      display: block;
+      padding: 15px;
+      font-weight: 700;
+      margin-top: -5px;
+    }
+
+    .mapboxgl-popup-content h4 {
+      margin: 0;
+      display: block;
+      padding: 10px 3px 10px 10px;
+      font-weight: 400;
+    }
+
+    .mapboxgl-container {
+      cursor: pointer;
+    }
+
+    .mapboxgl-popup-anchor-top>.mapboxgl-popup-content {
+      margin-top: 3px;
+    }
+
+    .mapboxgl-popup-anchor-top>.mapboxgl-popup-tip {
+      border-bottom-color: rgb(61, 59, 59);
+    }
+	
+	.marker {
+	  background-size: cover;
+	  background-position: center;
+	  width: 50px;
+	  height: 50px;
+	  border: 2px solid #333;
+	  padding: 0px;
+	  border-radius: 50%;
+	  cursor: pointer;
+	}
+  </style>
+</head>
+
+<body>
+
+  <div id='map'></div>
+  <script>
+
+    var transformRequest = (url, resourceType) => {
+      var isMapboxRequest =
+        url.slice(8, 22) === "api.mapbox.com" ||
+        url.slice(10, 26) === "tiles.mapbox.com";
+      return {
+        url: isMapboxRequest
+          ? url.replace("?", "?pluginName=sheetMapper&")
+          : url
+      };
+    };
+
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYWxjb2wiLCJhIjoiY2tsZnUxaTRwMG10dzJ2b2lzNXpvNHB1dyJ9.aycgZVz710QiYGRhXr0PlA'; //Mapbox token
+	
+    var map = new mapboxgl.Map({
+      container: 'map', // container id
+      style: 'mapbox://styles/mapbox/satellite-streets-v10', // choose a style: https://docs.mapbox.com/api/maps/#styles
+      center: [6.224643, 49.094974], // starting position [lng, lat]
+      zoom: 17,// starting zoom
+      transformRequest: transformRequest,
+			hash: true,
+			logoPosition: 'bottom-right'
+    });
+		
+    $(document).ready(function () {
+      $.ajax({
+        type: "GET",
+				//url: 'https://docs.google.com/spreadsheets/d/1ZcMZLBm62WHN8W_HQCuRqXo1x9Pq3otUGSmAp7Zj0Uk/gviz/tq?tqx=out:csv&sheet=Locations',
+        url: 'https://raw.githubusercontent.com/AlcolOfficial/Me217Map/main/data.csv',
+        dataType: "text",
+        success: function (csvData) { addDataToMap(csvData); }
+      });
+			
+			function addDataToMap(csvData) {				
+				var data;
+				csv2geojson.csv2geojson(csvData, {
+					latfield: 'Latitude',
+					lonfield: 'Longitude',
+					delimiter: ','
+					}, function(err, geoJson) {
+						data = geoJson;
+					});
+				
+				///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				
+				console.log("data.features:");
+				console.log(data.features);
+				
+				var bbox = turf.bbox(data);
+				map.fitBounds(bbox, { padding: 50 });
+				
+
+				map.on('load', function () {
+					
+					updateMarkers();
+					map.addSource('dataSource', {
+						'type': 'geojson',
+						'data': data,
+						'cluster': true,
+						'clusterRadius': 27,
+						'clusterMaxZoom': 10,
+						'clusterProperties': {
+							'unitNumber': ['concat',['get','Nom']]
+						}
+					});
+					
+					map.addLayer({
+						'id': 'dataSource_cluster_circle',
+						'type': 'circle',
+						'source': 'dataSource',
+						'filter': ['==', 'cluster', true],
+						
+						'paint': {
+							'circle-color': '#fed976',
+							'circle-opacity': 0.8,
+							'circle-radius': 25
+						}
+					});
+					map.addLayer({
+						'id': 'dataSource_cluster_label',
+						'type': 'symbol',
+						'source': 'dataSource',
+						'filter': ['==', 'cluster', true],
+						
+						'layout': {
+							// 'text-field': ['get','unitNumber'],
+							'text-field': '{point_count}',
+							'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+							'text-size': 10
+						},
+						'paint': {
+							'text-color': '#ffffff'
+						}
+					});
+					map.addLayer({
+						'id': 'dataSource_individual_circle',
+						'type': 'circle',
+						'source': 'dataSource',
+						'filter': ['!=', 'cluster', true],
+						
+						'paint': {
+							'circle-color': '#2596be',
+							'circle-opacity': 0.8,
+							'circle-radius': 20
+						}
+					});
+					map.addLayer({
+						'id': 'dataSource_individual_label',
+						'type': 'symbol',
+						'source': 'dataSource',
+						'filter': ['!=', 'cluster', true],
+						
+						'layout': {
+							'text-field': ['concat',['get','Nom'], ['get','Prenom']],
+							'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+							'text-size': 10,
+							'text-anchor': 'center',
+							'text-offset': [0,1.2]
+						},
+						'paint': {
+							'text-color': '#ffffff'
+						}
+					});
+					
+					map.on('move', updateMarkers); // moveend also considers zoomend
+					
+					// map.on('click', 'dataSource_cluster_circle', function (e) {
+						// var features = map.queryRenderedFeatures(e.point, { layers: ['dataSource_cluster_circle'] });
+						// var clusterId = features[0].properties.cluster_id;
+						// var point_count = features[0].properties.point_count;
+						// var clusterSource = map.getSource('dataSource');
+						
+						// clusterSource.getClusterChildren(clusterId, function(err, children){
+							// console.log(children);
+						// });
+						
+						// clusterSource.getClusterLeaves(clusterId, point_count, 0, function(err, leaves){
+							// console.log(leaves);
+						// })
+					// });
+					
+					function updateMarkers() {
+						
+						console.log("Update Markers");
+						$( ".marker" ).remove(); // remove all existing markers
+						var features = map.querySourceFeatures( 'dataSource' );
+						
+						features.forEach(function(dataPoint) {
+								// console.log(dataPoint);
+								if (dataPoint.properties.cluster){ // if the feature is clustered
+									
+									var clusterId = dataPoint.properties.cluster_id;
+									var pointCount = features[0].properties.point_count;
+									var clusterSource = map.getSource('dataSource');
+									
+									
+									// clusterSource.getClusterLeaves(clusterId, pointCount, 0, function(err, leave) {
+										// console.log(leave);
+									// });
+									
+									
+									var DOMel = document.createElement('div');
+									// var texte = document.createTextNode("Coucou");
+									// DOMel.appendChild(texte);
+									// console.log("created marked clustered");
+									// DOMel.innerHTML("Aaaaaaa3");
+									// DOMel.className = 'marker';
+									// DOMel.style.backgroundImage = 'url(https://drive.google.com/uc?export=view&id=1HDjTsM4RRZ6qr_I6jwsSdsBfvxo4n1ve)';
+									
+									// var marker = new mapboxgl.Marker(DOMel)
+									// .setLngLat(dataPoint.geometry.coordinates)
+									// .addTo(map);
+									
+								} else { // if the feature is not clustered
+									
+									// createMarker(dataPoint);
+									
+								};
+						});
+					};
+					
+					function createMarker(dataPoint) {
+						var coordinates = dataPoint.geometry.coordinates;
+						var nom = dataPoint.properties.Nom;
+						var prenom = dataPoint.properties.Prenom;
+						var bucque = dataPoint.properties.Bucque;
+						var nums = dataPoint.properties.Nums;
+						var adresse = dataPoint.properties.Adresse;
+						var telephone = dataPoint.properties.Telephone;
+						
+						var DOMel = document.createElement('div');
+						DOMel.className = 'marker';
+						DOMel.style.backgroundImage = 'url(' + dataPoint.properties.ImageLink + ')';
+						
+						var hoverPopup = new mapboxgl.Popup({offset: [0,-10], closeOnClik: true, anchor:'bottom'})
+							.setHTML(bucque + " " + nums)
+							.setLngLat(coordinates);
+						var clickPopup = new mapboxgl.Popup({offset: [0,-10], closeOnClik: true, anchor:'bottom'})
+							.setHTML("<h3>" + prenom + " " + nom + "</h3>" + adresse + "\n" + telephone);
+
+						var marker = new mapboxgl.Marker(DOMel)
+							.setLngLat(coordinates)
+							.setPopup(clickPopup);
+						
+						marker.getElement().addEventListener('mouseenter', function() {
+							if(!clickPopup.isOpen()) {
+								hoverPopup.addTo(map);
+							};;
+						});
+						marker.getElement().addEventListener('mouseleave', function() {
+							hoverPopup.remove();
+						});
+						
+						marker.addTo(map);
+					};
+					
+				}); //map.on('load') ends
+				
+				///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				
+			}; //function addDataToMap ends
+			
+			
+    });
+		
+
+  </script>
+
+</body>
+
+</html>
