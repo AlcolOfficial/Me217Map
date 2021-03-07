@@ -256,7 +256,7 @@
 						map.fire('closeAllPopups');
 						features.forEach(function(dataPoint) {
 								if (!dataPoint.properties.cluster){ // if the feature is not a cluster
-								
+									console.log("create marker");
 									createMarker(dataPoint);
 									
 								} else { // if the feature is a cluster
