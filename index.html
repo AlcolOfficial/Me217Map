@@ -146,13 +146,16 @@
 					x.setAttribute('src', feature.properties.ThumbnailLink);
 					document.querySelector('#preload-images').appendChild(x);
 				});
+				var x = document.createElement('IMG');
+				x.setAttribute('src', 'https://drive.google.com/uc?export=view&id=1uYkmAFoygZTzEiSkvsPKa2QR5Znmlpnw');
+				document.querySelector('#preload-images').appendChild(x);
 				
 				var bbox = turf.bbox(data);
 				map.fitBounds(bbox, { padding: 50 });
 				
-				map.on('style.load', function() {
+				map.once('idle', function() {
+					console.log("AAA");
 					updateMarkers();
-					console.log("load");
 				});
 				
 				map.on('load', function () {
@@ -183,9 +186,7 @@
 				});
 				
 				map.on('move', updateMarkers);
-				map.on('zoom', () => $('.mapboxgl-popup').remove());
-				map.on('load', updateMarkers);
-				
+				map.on('zoom', () => $('.mapboxgl-popup').remove());				
 				
 				var previousFeaturesCount = 0;
 				var renderedClusters = [];
@@ -295,7 +296,7 @@
 					marker.setPopup(hoverPopup).setPopup(clickPopup).addTo(map);
 				};				
 				
-			}; //function addDataToMap ends
+			}; //function processData ends
 			
 		});
 	
