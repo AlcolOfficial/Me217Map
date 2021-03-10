@@ -183,6 +183,8 @@
 					});
 				});
 				
+				map.addControl(new mapboxgl.FullscreenControl());
+				
 				map.on('move', updateMarkers);
 				map.on('zoom', () => $('.mapboxgl-popup').remove());				
 				
