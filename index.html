@@ -154,12 +154,10 @@
 				map.fitBounds(bbox, { padding: 50 });
 				
 				map.once('idle', function() {
-					console.log("AAA");
 					updateMarkers();
 				});
 				
 				map.on('load', function () {
-					console.log("load");
 					map.addSource('dataSource', {
 						'type': 'geojson',
 						'data': data,
