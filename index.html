@@ -138,18 +138,25 @@
 						data = geoJson;
 					});
 				
+				console.log(data);
+				
 				// pre-load all images
 				data.features.forEach(function(feature) {
 					var x = document.createElement('IMG');
 					x.setAttribute('src', feature.properties.ThumbnailLink);
 					document.querySelector('#preload-images').appendChild(x);
 				});
-				console.log(data);
+				
 				var bbox = turf.bbox(data);
 				map.fitBounds(bbox, { padding: 50 });
 				
-				map.on('style.load', function () {
-					console.log("style.load");
+				map.on('style.load', function() {
+					updateMarkers();
+					console.log("load");
+				});
+				
+				map.on('load', function () {
+					console.log("load");
 					map.addSource('dataSource', {
 						'type': 'geojson',
 						'data': data,
@@ -189,7 +196,7 @@
 					var features = map.querySourceFeatures( 'dataSource' );
 					
 					if (features.length !== previousFeaturesCount) {
-						console.log("Update Markers");
+						// console.log("Update Markers");
 						previousFeaturesCount = features.length;
 						$('.mapboxgl-popup').remove();	
 						$('.marker').remove();
@@ -198,7 +205,7 @@
 						map.fire('closeAllPopups');
 						features.forEach(function(dataPoint) {
 								if (!dataPoint.properties.cluster){ // if the feature is not a cluster
-									console.log("create marker");
+									// console.log("create marker");
 									createMarker(dataPoint);
 									
 								} else { // if the feature is a cluster
